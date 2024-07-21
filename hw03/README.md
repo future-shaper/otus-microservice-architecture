@@ -5,4 +5,4 @@ kubectl create namespace m && helm repo add ingress-nginx https://kubernetes.git
 ##### Манифесты должны лежать в одной директории. Применяем их командой 
 kubectl apply -f .
 ##### Проверяем в доступность в браузере
-http://arch.homework:8000/health
+http://arch.homework/health либо http://arch.homework/otusapp/student_name/health
