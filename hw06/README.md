@@ -1,1 +1,1 @@
-ДЗ №6
+ДЗ №6 Backend for frontends. Apigateway
