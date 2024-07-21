@@ -1,0 +1,618 @@
+openapi: 3.0.0
+info:
+  contact:
+    name: Andrey Sentsov
+    email: future-shaper@outlook.com
+  title: Домашнее задание №1
+  version: 0.1.0
+servers:
+  - url: http://arch.homework
+    description: Kubernetes cluster
+security:
+  - jwt: []
+  - session: []
+tags:
+  - name: auth
+    description: Сервис Авторизации
+  - name: profiles
+    description: Сервис Управления Профилем
+  - name: billing
+    description: Сервис Биллинга
+  - name: orders
+    description: Сервис Заказа
+  - name: notifications
+    description: Сервис уведомлений
+paths:
+  /register:
+    post:
+      tags:
+        - auth
+      summary: Регистрация пользователя
+      description: Создает пользователя, профиль в сервисе управления профилем и аккаунт в сервисе биллинга
+      requestBody:
+        $ref: '#/components/requestBodies/User'
+      responses:
+        200:
+          description: Регистрация прошла успешно
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      userId:
+                        type: string
+                        format: uuid
+                      profileId:
+                        type: string
+                        format: uuid
+        400:
+          description: Логин уже занят
+          content:
+            application/json:
+              schema:
+                type: string
+                format: string
+                example: User with login future-sh already exists
+        500:
+          description: В случае внутренних ошибок сервера
+          content:
+            application/json:
+              schema:
+                type: string
+                format: string
+                example: Server error
+  /login:
+    post:
+      tags:
+        - auth
+      summary: Вход
+      description: Вход клиента с логином и паролем
+      requestBody:
+        $ref: '#/components/requestBodies/Login'
+      responses:
+        200:
+          description: Успешный вход в систему
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    format: string
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwOi8vYXJjaC1hdXRoLXNlcnZpY2UuYXJjaC1mcyIsInN1YiI6InVzZXIiLCJraWQiOiJmcy1pZCIsInByb2ZpbGVJZCI6ImMwYTFiMzIzLWY3MGQtNDkwOC04ZTA5LTJhMzhiNGJhZjRkOCIsImV4cCI6MTcyMDU1ODgwMH0.NMj2SlpyoWWb7-mGZZgJ3NCRlw8D2S-iNymEhsxyj-k"
+                    type: string
+                    format: string
+                    example: 3fa85f6457174562b3fc2c963f66afa6
+        500:
+          description: В случае внутренних ошибок сервера
+          content:
+            application/json:
+              schema:
+                type: string
+                format: string
+                example: Server error
+  /logout:
+    post:
+      tags:
+        - auth
+      summary: Выход
+      description: Выход и закрытие сессии
+      responses:
+        200:
+          description: Успешный выход из системы
+        500:
+          description: В случае внутренних ошибок сервера
+          content:
+            application/json:
+              schema:
+                type: string
+                format: string
+                example: Server error
+  /profiles:
+    post:
+      tags:
+        - profiles
+      summary: Создание профиля
+      description: Создать новый профиль пользователя
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+              format: string
+              example: "future-shaper@outlook.com"
+      responses:
+        200:
+          description: Профиль успешно создан
+          content:
+            application/json:
+              schema:
+                type: string
+                format: uuid
+                example: "c0a1b323-f70d-4908-8e09-2a38b4baf4d8"
+        500:
+          description: В случае внутренних ошибок сервера
+          content:
+            application/json:
+              schema:
+                type: string
+                format: string
+                example: Server error
+  /profiles/{id}:
+    get:
+      tags:
+        - profiles
+      summary: Запрос данных профиля
+      description: Получить информацию о профиле
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+            example: c0a1b323-f70d-4908-8e09-2a38b4baf4d8
+          required: true
+          description: Идентификатор профиля пользователя
+      responses:
+        200:
+          description: Успешный запрос
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  email:
+                    type: string
+                    format: string
+                    example: "future-shaper@outlook.com"
+                  fullName:
+                    type: string
+                    format: string
+                    example: Высоков Андрей
+                  age:
+                    type: integer
+                    format: integer
+                    example: 44
+        500:
+          description: В случае внутренних ошибок сервера
+          content:
+            application/json:
+              schema:
+                type: string
+                format: string
+                example: Server error
+    patch:
+      tags:
+        - profiles
+      summary: Изменение профиля
+      description: Изменить данные профиля
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+            example: c0a1b323-f70d-4908-8e09-2a38b4baf4d8
+          required: true
+          description: Идентификатор профиля пользователя
+      requestBody:
+        $ref: '#/components/requestBodies/ProfileReqeust'
+      responses:
+        200:
+          description: Успешный запрос
+        500:
+          description: В случае внутренних ошибок сервера
+          content:
+            application/json:
+              schema:
+                type: string
+                format: string
+                example: Server error
+  /billing/account:
+    get:
+      tags:
+        - billing
+      summary: Запрос баланса
+      description: Получить данные по счету
+      responses:
+        200:
+          description: Успешный запрос
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  balance:
+                    type: number
+                    format: number
+                    example: 70700.5
+        500:
+          description: В случае внутренних ошибок сервера
+          content:
+            application/json:
+              schema:
+                type: string
+                format: string
+                example: Server error
+  /billing/account/deposit:
+    post:
+      tags:
+        - billing
+      summary: Пополнить баланс
+      description: Зачислить сумму на счет
+      requestBody:
+        $ref: '#/components/requestBodies/AccountReqeust'
+      responses:
+        200:
+          description: Успешный запрос
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  balance:
+                    type: number
+                    format: number
+                    example: 7000.7
+        500:
+          description: В случае внутренних ошибок сервера
+          content:
+            application/json:
+              schema:
+                type: string
+                format: string
+                example: Server error
+  /billing/account/withdraw:
+    post:
+      tags:
+        - billing
+      summary: Списать средства
+      description: Списать сумму со счета
+      requestBody:
+        $ref: '#/components/requestBodies/AccountReqeust'
+      responses:
+        200:
+          description: Успешный запрос
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  balance:
+                    type: number
+                    format: number
+                    example: 27000.00
+        500:
+          description: В случае внутренних ошибок сервера
+          content:
+            application/json:
+              schema:
+                type: string
+                format: string
+                example: Server error
+
+  /orders:
+    get:
+      tags:
+        - orders
+      summary: Запрос заказов пользователя
+      description: Получить все заказы пользователя
+      responses:
+        200:
+          description: Успешный запрос
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      format: uuid
+                    orderNumber:
+                      type: integer
+                      format: integer
+                    state:
+                      type: string
+                      enum:
+                        - CREATED
+                        - PAID
+                        - COMPLETED
+                        - CANCELED
+              example:
+                - id: 'c6bb20b5-5643-4664-ad14-8a96c639f8dc'
+                  integer: 1
+                  state: created
+                - id: '1608106e-7597-404c-bd6b-762656d250bf'
+                  integer: 2
+                  state: completed
+        500:
+          description: В случае внутренних ошибок сервера
+          content:
+            application/json:
+              schema:
+                type: string
+                format: string
+                example: Server error
+    post:
+      tags:
+        - orders
+      summary: Создание нового заказа
+      description: Создать заказ
+      requestBody:
+        $ref: '#/components/requestBodies/Order'
+      responses:
+        200:
+          description: Успешный запрос
+          content:
+            application/json:
+              schema:
+                type: string
+                format: uuid
+        500:
+          description: В случае внутренних ошибок сервера
+          content:
+            application/json:
+              schema:
+                type: string
+                format: string
+                example: Server error
+  /orders/{id}:
+    get:
+      tags:
+        - orders
+      summary: Запрос данных заказа
+      description: Получить заказ пользователя
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+            example: c0a1b323-f70d-4908-8e09-2a38b4baf4d8
+          required: true
+          description: Идентификатор профиля пользователя
+      responses:
+        200:
+          description: Успешный запрос
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  profileId:
+                    type: string
+                    format: uuid
+                  orderNumber:
+                    type: integer
+                    format: integer
+                    example: 3
+                  productQuantity:
+                    type: integer
+                    format: integer
+                    example: 7
+        500:
+          description: В случае внутренних ошибок сервера
+          content:
+            application/json:
+              schema:
+                type: string
+                format: string
+                example: Server error
+  /orders/{id}/execute:
+    post:
+      tags:
+        - orders
+      summary: Обработка события
+      description: Обработка события, связанного с заказом
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+            example: c0a1b323-f70d-4908-8e09-2a38b4baf4d8
+          required: true
+          description: Идентификатор профиля пользователя
+      requestBody:
+        $ref: '#/components/requestBodies/HttpEvent'
+      responses:
+        200:
+          description: Успешный запрос
+        500:
+          description: В случае внутренних ошибок сервера
+          content:
+            application/json:
+              schema:
+                type: string
+                format: string
+                example: Server error
+
+  /notifications:
+    get:
+      tags:
+        - notifications
+      summary: 'Список уведомлений'
+      description: 'Получить список уведомлений'
+      responses:
+        200:
+          description: 'Cписок уведомлений'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Notification'
+
+
+components:
+  securitySchemes:
+    jwt:
+      type: apiKey
+      name: x-auth-token
+      in: header
+    session:
+      type: apiKey
+      name: x-auth-session
+      in: header
+  schemas:
+    User:
+      type: object
+      properties:
+        email:
+          type: string
+          format: string
+          example: future-shaper@outlook.com
+        login:
+          type: string
+          format: string
+          example: future-sh
+        password:
+          type: string
+          format: string
+          example: Pa$$w0rdTest2025
+    ProfileReqeust:
+      type: object
+      properties:
+        fullName:
+          type: string
+          format: string
+          example: 'Высоков Андрей'
+        age:
+          type: integer
+          format: integer
+          example: 34
+    Order:
+      type: object
+      properties:
+        productQuantity:
+          type: integer
+    Notification:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        text:
+          type: string
+    EditEvent:
+      type: object
+      properties:
+        event:
+          type: string
+          enum:
+            - COMPLETE
+            - PAID
+            - CANCEL
+            - EDIT
+          example: EDIT
+        productQuantity:
+          type: integer
+    PayEvent:
+      type: object
+      properties:
+        event:
+          type: string
+          enum:
+            - COMPLETE
+            - PAID
+            - CANCEL
+            - EDIT
+          example: PAID
+        date:
+          type: string
+          format: string
+          example: "2024-07-07T09:11:50.000+05:30"
+    CancelEvent:
+      type: object
+      properties:
+        event:
+          type: string
+          enum:
+            - COMPLETE
+            - PAID
+            - CANCEL
+            - EDIT
+          example: CANCEL
+        reason:
+          type: string
+          format: string
+    CompleteEvent:
+      type: object
+      properties:
+        event:
+          type: string
+          enum:
+            - COMPLETE
+            - PAID
+            - CANCEL
+            - EDIT
+          example: COMPLETE
+  requestBodies:
+    User:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/User'
+          examples:
+            sample-user:
+              summary: Обычный пользователь
+              value:
+                email: 'future-shaper@outlook.com'
+                login: 'future-sh'
+                password: 'Pa$$w0rdTest2025'
+      description: User object that needs to be created
+      required: true
+    Login:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              login:
+                type: string
+              password:
+                type: string
+          example:
+            login: 'future-sh'
+            password: 'Pa$$w0rdTest2025'
+    ProfileReqeust:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProfileReqeust'
+          example:
+            fullName: 'Высоков Андрей'
+            age: 44
+    AccountReqeust:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              amount:
+                type: number
+          example:
+            sum: 7000.00
+    Order:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Order'
+    HttpEvent:
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: '#/components/schemas/CompleteEvent'
+              - $ref: '#/components/schemas/EditEvent'
+              - $ref: '#/components/schemas/PayEvent'
+              - $ref: '#/components/schemas/CancelEvent'
