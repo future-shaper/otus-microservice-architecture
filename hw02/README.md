@@ -15,6 +15,7 @@ docker push futureshaper/microservice-architecture-homeworks:hw02
 docker run -p 8000:80 futureshaper/microservice-architecture-homeworks:hw02
 ##### Проверяем в доступность 
 curl http://arch.homework:8000/health
+
 ![img_1.png](img_1.png)
     
    
