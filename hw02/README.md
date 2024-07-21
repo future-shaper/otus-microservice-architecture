@@ -14,8 +14,8 @@ docker tag hw02 futureshaper/microservice-architecture-homeworks:hw02
 docker push futureshaper/microservice-architecture-homeworks:hw02
 ##### Запускаем образ из docer hub    
 docker run -p 8000:80 futureshaper/microservice-architecture-homeworks:hw02
-##### Проверяем в доступность 
-curl http://arch.homework:8000/health
+##### Проверяем в доступность в браузере
+http://arch.homework:8000/health 
 
 ![img_01.png](img_01.png)
     
