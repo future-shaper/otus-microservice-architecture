@@ -4,5 +4,5 @@
 kubectl create namespace m && helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx/ && helm repo update && helm install nginx ingress-nginx/ingress-nginx --namespace m -f nginx-ingress.yaml
 ##### Манифесты должны лежать в одной директории. Применяем их командой 
 kubectl apply -f .
-#####Проверяем в доступность в браузере
+##### Проверяем в доступность в браузере
 http://arch.homework:8000/health
