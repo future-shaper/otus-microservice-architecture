@@ -1,1 +1,1 @@
-ДЗ №7
+ДЗ №7 Stream processing
