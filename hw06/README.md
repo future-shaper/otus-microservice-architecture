@@ -19,7 +19,7 @@
 
 ##### 1) команды установки приложения
 ```
-kubectl apply -f ./menifests
+kubectl apply -f ./manifests
 helm istall api -n ms-auth ./auth/helm
 helm install api -n ms-profile ./profile/helm
 ```
