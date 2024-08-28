@@ -1,0 +1,192 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-hw-deployment-billing
+  labels:
+    app: {{ .Release.Name }}-hw-app-k8s-a
+
+spec:
+  replicas: {{ .Values.container.billing.replicaCount }}
+  selector:
+    matchLabels:
+      env: hw-billing
+  template:
+    metadata:
+      labels:
+        env: hw-billing
+    spec:
+      containers:
+      - name: {{ .Release.Name }}-hw07-billing
+        image: {{ .Values.container.billing.image }}
+        ports:
+          - containerPort: {{ .Values.container.billing.containerPort }}
+        env:
+          - name: spring.datasource.url
+            valueFrom:
+              configMapKeyRef:
+                name: {{ .Release.Name }}-hw-app-config
+                key: datasourceUrl
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-hw-deployment-notice
+  labels:
+    app: {{ .Release.Name }}-hw-app-k8s-s
+
+spec:
+  replicas: {{ .Values.container.notice.replicaCount }}
+  selector:
+    matchLabels:
+      env: hw-notice
+  template:
+    metadata:
+      labels:
+        env: hw-notice
+    spec:
+      containers:
+        - name: {{ .Release.Name }}-hw07-notice
+          image: {{ .Values.container.notice.image }}
+          ports:
+            - containerPort: {{ .Values.container.notice.containerPort }}
+          env:
+            - name: spring.datasource.url
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Release.Name }}-hw-app-config
+                  key: datasourceUrl
+            - name: spring.artemis.broker-url
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Release.Name }}-hw-app-config
+                  key: artemisUrl
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-hw-deployment-order
+  labels:
+    app: {{ .Release.Name }}-hw-app-k8s-s
+
+spec:
+  replicas: {{ .Values.container.order.replicaCount }}
+  selector:
+    matchLabels:
+      env: hw-order
+  template:
+    metadata:
+      labels:
+        env: hw-order
+    spec:
+      containers:
+        - name: {{ .Release.Name }}-hw07-order
+          image: {{ .Values.container.order.image }}
+          ports:
+            - containerPort: {{ .Values.container.order.containerPort }}
+          env:
+            - name: spring.datasource.url
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Release.Name }}-hw-app-config
+                  key: datasourceUrl
+            - name: spring.artemis.broker-url
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Release.Name }}-hw-app-config
+                  key: artemisUrl
+            - name: application.account-url
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Release.Name }}-hw-app-config
+                  key: accountUrl
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-postgres
+  labels:
+    app: {{ .Release.Name }}-hw-postgres
+
+spec:
+  replicas: {{ .Values.container.postgres.replicaCount }}
+  selector:
+    matchLabels:
+      env: postgres-app
+  template:
+    metadata:
+      labels:
+        env: postgres-app
+    spec:
+      containers:
+        - name  : {{ .Release.Name }}-postgres-13
+          image : {{ .Values.container.postgres.image }}
+          ports :
+            - containerPort: {{ .Values.container.postgres.containerPort }}
+          env:
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-hw-secret
+                  key : postgresDb
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-hw-secret
+                  key : postgresUser
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-hw-secret
+                  key : postgresPassword
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-jms-broker
+  labels:
+    app: h{{ .Release.Name }}-w-jms-broker
+
+spec:
+  replicas: {{ .Values.container.jmsBroker.replicaCount }}
+  selector:
+    matchLabels:
+      env: jms-broker-app
+  template:
+    metadata:
+      labels:
+        env: jms-broker-app
+    spec:
+      containers:
+        - name  : {{ .Release.Name }}-hw-broker
+          image : {{ .Values.container.jmsBroker.image }}
+          ports :
+            - containerPort: {{ .Values.container.jmsBroker.containerPort }}
+          env:
+            - name: ARTEMIS_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-hw-secret
+                  key : artemisUsername
+            - name: ARTEMIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-hw-secret
+                  key : artemisPassword
+            - name: ARTEMIS_MAX_MEMORY
+              value: 1G
+            - name: BROKER_CONFIG_GLOBAL_MAX_SIZE
+              value: "200000000"
+            - name: ARTEMIS_PERF_JOURNAL
+              value: ALWAYS
+            - name: ENABLE_JMX_EXPORTER
+              value: "true"
+            - name: JAVA_OPTS
+              value: -XX:NativeMemoryTracking=summary
